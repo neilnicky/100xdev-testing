@@ -1,30 +1,29 @@
 import express from "express";
+import z from "zod";
 
 export const app = express();
 app.use(express.json());
+
+const sumInput = z.object({
+  a: z.number(),
+  b: z.number(),
+});
+
+app.post("/sum", (req, res) => {
+  const parsedResponse = sumInput.safeParse(req.body);
+
+  if (!parsedResponse.success) {
+    return res.status(411).json({
+        message: "Incorrect Input"
+    })
+  }
+});
 
 app.post("/sum", (req, res) => {
   const a = req.body.a;
   const b = req.body.b;
 
   const result = a + b;
-
-  res.json({ answer: result });
-});
-
-
-
-app.post("/multiply", (req, res) => {
-  const a = req.body.a;
-  const b = req.body.b;
-
-  if (a > 1000000 || b > 1000000) {
-    return res.status(422).json({
-      message: "Numbers must be less than 1,000,000",
-    });
-  }
-
-  const result = a * b;
 
   res.json({ answer: result });
 });
