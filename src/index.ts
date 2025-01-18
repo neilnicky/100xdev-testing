@@ -1,5 +1,5 @@
 import express from "express";
-import z from "zod";
+import { z } from "zod";
 
 export const app = express();
 app.use(express.json());
@@ -13,17 +13,35 @@ app.post("/sum", (req, res) => {
   const parsedResponse = sumInput.safeParse(req.body);
 
   if (!parsedResponse.success) {
-    return res.status(411).json({
-        message: "Incorrect Input"
-    })
+    res.status(411).json({
+      message: "Incorrect inputs",
+    });
+    return;
   }
+
+  const answer = parsedResponse.data.a + parsedResponse.data.b;
+
+  res.json({
+    answer,
+  });
 });
 
-app.post("/sum", (req, res) => {
-  const a = req.body.a;
-  const b = req.body.b;
+app.get("/sum", (req, res) => {
+  const parsedResponse = sumInput.safeParse({
+    a: Number(req.headers["a"]),
+    b: Number(req.headers["b"]),
+  });
 
-  const result = a + b;
+  if (!parsedResponse.success) {
+    res.status(411).json({
+      message: "Incorrect inputs",
+    });
+    return;
+  }
 
-  res.json({ answer: result });
+  const answer = parsedResponse.data.a + parsedResponse.data.b;
+
+  res.json({
+    answer,
+  });
 });
