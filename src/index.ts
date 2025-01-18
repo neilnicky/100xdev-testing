@@ -1,46 +1,30 @@
-
 import express from "express";
-import { z } from "zod";
+import { prismaClient } from "./db";
 
 export const app = express();
 app.use(express.json());
 
-const sumInput = z.object({
-    a: z.number(),
-    b: z.number()
-})
+app.post("/multiply", async (req, res) => {
+  const a = req.body.a;
+  const b = req.body.b;
 
-app.post("/sum", (req, res) => {
-    const parsedResponse = sumInput.safeParse(req.body)
-    
-    if (!parsedResponse.success) {
-        return res.status(411).json({
-            message: "Incorrect inputs"
-        })
-    }
+  if (a > 1000000 || b > 1000000) {
+    res.status(422).json({
+      message: "Numbers must be less than 1,000,000",
+    });
+    return;
+  }
 
-    const answer = parsedResponse.data.a + parsedResponse.data.b;
+  const result = a * b;
 
-    res.json({
-        answer
-    })
-});
+  await prismaClient.request.create({
+    data: {
+      a: a,
+      b: b,
+      answer: result,
+      type: "Multiply",
+    },
+  });
 
-app.get("/sum", (req, res) => {
-    const parsedResponse = sumInput.safeParse({
-        a: Number(req.headers["a"]),
-        b: Number(req.headers["b"])
-    })
-    
-    if (!parsedResponse.success) {
-        return res.status(411).json({
-            message: "Incorrect inputs"
-        })
-    }
-
-    const answer = parsedResponse.data.a + parsedResponse.data.b;
-
-    res.json({
-        answer
-    })
+  res.json({ answer: result });
 });
