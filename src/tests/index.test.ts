@@ -1,12 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
 import { app } from "../index";
 import request from "supertest";
+import { prismaClient } from "../__mocks__/db";
 
 vi.mock("../db.ts");
 
-
 describe("Tests multiplication", () => {
   it("Should return 4 when 2 * 2", async () => {
+    prismaClient.request.create.mockResolvedValue({
+      id: 1,
+      a: 2,
+      b: 2,
+      answer: 4,
+      type: "Multiply",
+    });
     const res = await request(app).post("/multiply").send({
       a: 2,
       b: 2,
