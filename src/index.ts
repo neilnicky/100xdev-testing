@@ -40,7 +40,7 @@ app.post("/sum", async (req, res) => {
 
   if (!parsedResponse.success) {
     res.status(411).json({
-      message: "Incorrect inputs",
+      message: "Incorrect input format",
     });
     return;
   }
@@ -60,3 +60,6 @@ app.post("/sum", async (req, res) => {
     answer,
   });
 });
+
+
+
