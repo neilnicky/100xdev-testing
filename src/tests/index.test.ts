@@ -2,16 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { app } from "../index";
 import request from "supertest";
 
-vi.mock("../db.ts", () => {
-  return {
-    prismaClient: {
-      request: {
-        create: vi.fn(),
-        delete: vi.fn(),
-      },
-    },
-  };
-});
+vi.mock("../db.ts");
 
 
 describe("Tests multiplication", () => {
