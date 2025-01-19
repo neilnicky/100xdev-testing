@@ -1,36 +1,57 @@
-import { sum, multiply } from "../index";
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it, vi } from "vitest";
+import { app } from "../index";
+import request from "supertest";
+import { prismaClient } from "../__mocks__/db";
+import { a } from "vitest/dist/chunks/suite.BJU7kdY9";
 
-describe("sum", () => {
-  it("should be able to add two positive numbers", () => {
-    const ans = sum(2, 3);
-    expect(ans).toBe(5);
+vi.mock("../db.ts");
+
+describe("Tests multiplication", () => {
+  it("Should return 4 when 2 * 2", async () => {
+    prismaClient.request.create.mockResolvedValue({
+      id: 1,
+      a: 2,
+      b: 2,
+      answer: 4,
+      type: "Multiply",
+    });
+
+    vi.spyOn(prismaClient.request, "create");
+
+    const res = await request(app).post("/multiply").send({
+      a: 2,
+      b: 2,
+    });
+
+    expect(prismaClient.request.create).toHaveBeenCalledWith({
+      data: {
+        a: 2,
+        b: 2,
+        answer: 4,
+        type: "Multiply",
+      },
+    });
+    expect(res.body.answer).toBe(4);
+    expect(res.statusCode).toBe(200);
   });
 
-  it("should be able to add two negative numbers", () => {
-    const ans = sum(-2, -3);
-    expect(ans).toBe(-5);
+  it("Should return right value if one value is negative ", async () => {
+    const res = await request(app).post("/multiply").send({
+      a: -2,
+      b: 500,
+    });
+
+    expect(res.body.answer).toBe(-1000);
+    expect(res.statusCode).toBe(200);
   });
 
-  it("should be able to add two 0s", () => {
-    const ans = sum(0, 0);
-    expect(ans).toBe(0);
-  });
-});
+  it("Should fail when a number is too big", async () => {
+    const res = await request(app).post("/multiply").send({
+      a: 23,
+      b: 500000000,
+    });
 
-describe("multiply", () => {
-  it("should be able to multiply two positive numbers", () => {
-    const ans = multiply(2, 3);
-    expect(ans).toBe(6);
-  });
-
-  it("should be able to multiply two negative numbers", () => {
-    const ans = multiply(-2, -3);
-    expect(ans).toBe(6);
-  });
-
-  it("should be able to multiply two 0s", () => {
-    const ans = multiply(0, 0);
-    expect(ans).toBe(0);
+    expect(res.body.message).toBe("Numbers must be less than 1,000,000");
+    expect(res.statusCode).toBe(422);
   });
 });
