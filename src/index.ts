@@ -32,7 +32,7 @@ app.post("/multiply", async (req, res) => {
     },
   });
 
-  res.json({ answer: result, id: request.id }); 
+  res.json({ answer: result, id: request.id });
 });
 
 app.post("/sum", async (req, res) => {

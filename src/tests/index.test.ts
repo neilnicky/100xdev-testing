@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { app } from "../index";
 import request from "supertest";
 import { prismaClient } from "../__mocks__/db";
+import { a } from "vitest/dist/chunks/suite.BJU7kdY9";
 
 vi.mock("../db.ts");
 
@@ -14,11 +15,22 @@ describe("Tests multiplication", () => {
       answer: 4,
       type: "Multiply",
     });
+
+    vi.spyOn(prismaClient.request, "create");
+
     const res = await request(app).post("/multiply").send({
       a: 2,
       b: 2,
     });
 
+    expect(prismaClient.request.create).toHaveBeenCalledWith({
+      data: {
+        a: 2,
+        b: 2,
+        answer: 4,
+        type: "Multiply",
+      },
+    });
     expect(res.body.answer).toBe(4);
     expect(res.statusCode).toBe(200);
   });
